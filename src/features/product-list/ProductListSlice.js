@@ -1,20 +1,53 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { fetchCount } from './ProductListAPI';
+import { fetchAllProducts, fetchProductsByFilters, fetchBrands, fetchCategories, fetchProductById } from './ProductListAPI';
 
 const initialState = {
-  value: 0,
+  products: [],
+  brands: [],
+  categories: [],
   status: 'idle',
+  totalItems: 0,
+  selectedProduct: null
 };
-export const incrementAsync = createAsyncThunk(
-  'counter/fetchCount',
-  async (amount) => {
-    const response = await fetchCount(amount);
+export const fetchAllProductsAsync = createAsyncThunk(
+  'product-list/fetchAllProducts',
+  async () => {
+    const response = await fetchAllProducts();
+    return response.data;
+  }
+);
+export const fetchAllProductByIdsAsync = createAsyncThunk(
+  'product-list/fetchProductById',
+  async (id) => {
+    const response = await fetchProductById(id);
+    return response.data;
+  }
+);
+export const fetchProductsByFiltersAsync = createAsyncThunk(
+  'product-list/fetchProductsByFilters',
+  async ({ filter, sort, pagination }) => {
+    const response = await fetchProductsByFilters(filter, sort, pagination);
     return response.data;
   }
 );
 
-export const counterSlice = createSlice({
-  name: 'counter',
+export const fetchBrandsAsync = createAsyncThunk(
+  'product-list/fetchBrands',
+  async () => {
+    const response = await fetchBrands();
+    return response.data;
+  }
+);
+export const fetchCategoriesAsync = createAsyncThunk(
+  'product-list/fetchCategories',
+  async () => {
+    const response = await fetchCategories();
+    return response.data;
+  }
+);
+
+export const productslice = createSlice({
+  name: 'product-list',
   initialState,
   reducers: {
     increment: (state) => {
@@ -23,18 +56,51 @@ export const counterSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(incrementAsync.pending, (state) => {
+      .addCase(fetchAllProductsAsync.pending, (state) => {
         state.status = 'loading';
       })
-      .addCase(incrementAsync.fulfilled, (state, action) => {
+      .addCase(fetchAllProductsAsync.fulfilled, (state, action) => {
         state.status = 'idle';
-        state.value += action.payload;
-      });
+        state.products = action.payload;
+      })
+      .addCase(fetchProductsByFiltersAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchProductsByFiltersAsync.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.products = action.payload.products;
+        state.totalItems = action.payload.totalItems;
+      })
+      .addCase(fetchBrandsAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchBrandsAsync.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.brands = action.payload;
+      })
+      .addCase(fetchCategoriesAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchCategoriesAsync.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.categories = action.payload;
+      })
+      .addCase(fetchAllProductByIdsAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(fetchAllProductByIdsAsync.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.selectedProduct = action.payload;
+      })
   },
 });
 
-export const { increment } = counterSlice.actions;
-export const selectCount = (state) => state.counter.value;
+export const { increment } = productslice.actions;
+export const selectAllProducts = (state) => state.product.products;
+export const selectBrands = (state) => state.product.brands;
+export const selectCategories = (state) => state.product.categories;
+export const selectProductById = (state) => state.product.selectedProduct;
 
-
-export default counterSlice.reducer;
+export const selectTotalItems = (state) => state.product.totalItems;
+export default productslice.reducer;
+// last scene -->2:53:11
