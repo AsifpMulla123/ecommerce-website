@@ -16,7 +16,7 @@ export function checkUser(loginInfo) {
     const password = loginInfo.password;
     const response = await fetch('http://localhost:8080/users?email=' + email);
     const data = await response.json();
-    console.log({data});
+    console.log({ data });
     if (data.length) {
       if (password === data[0].password) {
         resolve({ data: data[0] })
@@ -29,6 +29,14 @@ export function checkUser(loginInfo) {
       reject({ message: "user not found" })
     }
     resolve({ data });
+  }
+  );
+}
+
+export function signOut(userId) {
+  return new Promise(async (resolve) => {
+    // we will do it in the backend
+    resolve({ data: "Success" });
   }
   );
 }

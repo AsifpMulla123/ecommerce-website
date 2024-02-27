@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { AddTocart, deleteItemFromCart, fetchItemsByUserId, Updatecart } from './CartAPI';
+import { AddTocart, deleteItemFromCart, fetchItemsByUserId, resetCart, Updatecart } from './CartAPI';
 
 const initialState = {
   status: "idle",
@@ -38,6 +38,14 @@ export const deleteItemFromCartAsync = createAsyncThunk(
     return response.data;
   }
 );
+export const resetCartAsync = createAsyncThunk(
+  'cart/resetCart',
+  async (userId) => {
+    const response = await resetCart(userId);
+
+    return response.data;
+  }
+);
 
 export const counterSlice = createSlice({
   name: 'cart',
@@ -47,13 +55,6 @@ export const counterSlice = createSlice({
     increment: (state) => {
 
       state.value += 1;
-    },
-    decrement: (state) => {
-      state.value -= 1;
-    },
-
-    incrementByAmount: (state, action) => {
-      state.value += action.payload;
     },
   },
 
@@ -78,7 +79,7 @@ export const counterSlice = createSlice({
       })
       .addCase(updateItemAsync.fulfilled, (state, action) => {
         state.status = 'idle';
-        const index = state.items.findIndex(item => item.id === action.payload.id)   //last scene--> 3:43:40
+        const index = state.items.findIndex(item => item.id === action.payload.id)
         state.items[index] = action.payload;
       })
       .addCase(deleteItemFromCartAsync.pending, (state) => {
@@ -86,13 +87,20 @@ export const counterSlice = createSlice({
       })
       .addCase(deleteItemFromCartAsync.fulfilled, (state, action) => {
         state.status = 'idle';
-        const index = state.items.findIndex(item => item.id === action.payload.id)   //last scene--> 3:43:40
+        const index = state.items.findIndex(item => item.id === action.payload.id)
         state.items.splice(index, 1);
+      })
+      .addCase(resetCartAsync.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(resetCartAsync.fulfilled, (state, action) => {
+        state.status = 'idle';
+       state.items = []
       })
   },
 });
 
-export const { increment, decrement, incrementByAmount } = counterSlice.actions;
+export const { increment } = counterSlice.actions;
 
 
 export const selectItems = (state) => state.cart.items;

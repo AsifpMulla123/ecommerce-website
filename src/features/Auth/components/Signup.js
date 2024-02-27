@@ -31,7 +31,14 @@ const Signup = () => {
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <form className="space-y-6" noValidate onSubmit={handleSubmit((data) => {
-            dispatch(createUserAsync({ email: data.email, password: data.password }));
+            dispatch(
+              createUserAsync({ 
+                email: data.email, 
+                password: data.password,
+                addresses:[],
+                role:"user"
+              // This role is also given throw the backend
+              }));
             console.log(data);
           })}>
             <div>
@@ -43,7 +50,7 @@ const Signup = () => {
                   id="email"
                   {...register("email", {
                     required: "Email is required.", pattern: {
-                      value: /\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b/gi,
+                      value: /\b[\w-]+@[\w-]+\w{2,4}\b/gi,
                       message: 'email not valid',
                     },
                   })}

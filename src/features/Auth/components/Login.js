@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, Navigate } from 'react-router-dom';
 import { checkUserAsync, selectError, selectLoggedInUser } from '../authSlice';
@@ -44,7 +44,7 @@ export default function Login() {
                   id="email"
                   {...register("email", {
                     required: "Email is required.", pattern: {
-                      value: /\b[\w\.-]+@[\w\.-]+\.\w{2,4}\b/gi,
+                      value: /\b[\w-]+@[\w-]+\w{2,4}\b/gi,
                       message: 'email not valid',
                     },
                   })}
@@ -62,7 +62,7 @@ export default function Login() {
                   Password
                 </label>
                 <div className="text-sm">
-                  <Link to="#" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                  <Link to="/forgot-password" className="font-semibold text-indigo-600 hover:text-indigo-500">
                     Forgot password?
                   </Link>
                 </div>

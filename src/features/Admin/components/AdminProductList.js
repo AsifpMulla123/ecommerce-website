@@ -9,7 +9,7 @@ import {
   selectBrands,
   selectCategories,
   selectTotalItems,
-} from '../ProductListSlice';
+} from '../../product-list/ProductListSlice';
 import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon, StarIcon } from '@heroicons/react/20/solid'
@@ -28,7 +28,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function ProductList() {
+export default function AdminProductList() {
   const dispatch = useDispatch();
   const products = useSelector(selectAllProducts);
   const brands = useSelector(selectBrands);
@@ -180,7 +180,9 @@ export default function ProductList() {
 
               {/* Product grid */}
               <div className="lg:col-span-3">
-
+                <Link to="/admin/product-form"
+                  className='rounded-md mx-10 my-3 bg-green-600 px-3 py-3 text-sm font-semibold text-white'
+                >Add New Product</Link>
                 {/* The product boxes or cards */}
                 <ProductGrid products={products} />
 
@@ -346,7 +348,7 @@ function DesktopFilter({ handleFilter, filters }) {
 }
 function Pagination({ page, setPage, handlePage, totalItems }) {
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
-  console.log("Total Page of Pagination : " + totalPages);
+  // console.log("Total Page of Pagination : " + totalPages);   
   return (
     <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
       <div className="flex flex-1 justify-between sm:hidden">
@@ -442,11 +444,20 @@ function ProductGrid({ products }) {
                     </p>
                   </div>
                 </div>
+                {product.deleted && <div>
+                  <p className='text-red-400'>Product deleted</p>
+                </div>}
+              </div>
+              <div className='mt-5'>
+                <Link
+                  to={`/admin/product-form/edit/${product.id}`}
+                  className='rounded-md my-3 bg-indigo-600 px-3 py-3 text-sm font-semibold text-white'
+                >Edit Product</Link>
               </div>
             </Link>
           ))}
         </div>
       </div>
-    </div>
+    </div >
   );
 }

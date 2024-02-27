@@ -44,8 +44,12 @@ export default function Cart() {
   const [open, setOpen] = useState(true)
   console.log(open);
   const items = useSelector(selectItems);
-  const totalAmount = items.reduce((amount, item) => item.price * item.quantity + amount, 0)
-  const totalItems = items.reduce((total, item) => item.quantity + total, 0)
+  const totalAmount = items.reduce(
+    (amount, item) => item.price * item.quantity + amount,
+    0
+  );
+  const totalItems = items.reduce((total, item) => item.quantity + total, 0);
+
   const handleQuantity = (e, item) => {
     dispatch(updateItemAsync({ ...item, quantity: +e.target.value }))
   }
@@ -54,13 +58,14 @@ export default function Cart() {
   }
   return (
     <>
-      {!items.length&& <Navigate to="/" replace={true}></Navigate>}
+      {!items.length && <Navigate to="/" replace={true}></Navigate>}
       <div>
         <div className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8  bg-white">
           <div className="border-t border-gray-200 px-4 py-6 sm:px-6">
             <h1 className='text-4xl font-bold tracking-tight text-gray-900 my-10'>Cart</h1>
             <div className="flow-root">
-              <ul role="list" className="-my-6 divide-y divide-gray-200">
+              {/* <ul role="list" className="-my-6 divide-y divide-gray-200"> */}
+              <ul className="-my-6 divide-y divide-gray-200">
                 {items.map((item) => (
                   <li key={item.id} className="flex py-6">
                     <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-gray-200">

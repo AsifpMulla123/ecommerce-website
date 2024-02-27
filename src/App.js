@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import './App.css';
 import Home from './Pages/Home';
 import LoginPage from './Pages/LoginPage';
-
 import {
   createBrowserRouter,
   RouterProvider,
@@ -15,6 +14,19 @@ import ProductDetailsPage from './Pages/ProductDetailsPage';
 import Protected from './features/Auth/components/Protected';
 import { fetchItemsByUserIdAsync } from './features/Cart/CartSlice';
 import { selectLoggedInUser } from './features/Auth/authSlice';
+import PageNotFound from './Pages/PageNotFound';
+import OrderSuccessPage from './Pages/OrderSuccessPage';
+import UserOrder from './Pages/UserOrder';
+import UserProfilePage from './Pages/UserProfilePage';
+import { fetchLoggedInUserAsync } from './features/user/userSlice';
+import Logout from './features/Auth/components/Logout';
+import ForgotPasswordPage from './Pages/ForgotPasswordPage';
+import AdminHome from './Pages/AdminHome';
+import AdminProductDetailsPage from './Pages/AdminProductDetailsPage';
+import ProtectedAdmin from './features/Auth/components/ProtectedAdmin';
+import AdminProductDetailFormPage from './Pages/AdminProductDetailFormPage';
+import AdminOrderPage from './Pages/AdminOrderPage';
+
 
 const router = createBrowserRouter([
   {
@@ -23,6 +35,14 @@ const router = createBrowserRouter([
       <Protected>
         <Home />
       </Protected>
+    ),
+  },
+  {
+    path: "/admin",
+    element: (
+      <ProtectedAdmin>
+        <AdminHome />
+      </ProtectedAdmin>
     ),
   },
   {
@@ -45,6 +65,46 @@ const router = createBrowserRouter([
     path: "/product-detail/:id",
     element: <Protected><ProductDetailsPage /></Protected>,
   },
+  {
+    path: "/admin/product-detail/:id",
+    element: <ProtectedAdmin><AdminProductDetailsPage /></ProtectedAdmin>,
+  },
+  {
+    path: "/admin/product-form",
+    element: <ProtectedAdmin><AdminProductDetailFormPage /></ProtectedAdmin>,
+  },
+  {
+    path: "/admin/orders",
+    element: <ProtectedAdmin><AdminOrderPage /></ProtectedAdmin>,
+  },
+  {
+    path: "/admin/product-form/edit/:id",
+    element: <ProtectedAdmin><AdminProductDetailFormPage /></ProtectedAdmin>,
+  },
+  {
+    path: "/order-success/:id",
+    element: <OrderSuccessPage />,
+  },
+  {
+    path: "/orders",
+    element: <UserOrder />,
+  },
+  {
+    path: "/profile",
+    element: <UserProfilePage />,
+  },
+  {
+    path: "/logout",
+    element: <Logout />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "*",
+    element: <PageNotFound />,
+  },
 ]);
 function App() {
   const dispatch = useDispatch();
@@ -52,6 +112,7 @@ function App() {
   useEffect(() => {
     if (user) {
       dispatch(fetchItemsByUserIdAsync(user.id));
+      dispatch(fetchLoggedInUserAsync(user.id));
     }
   }, [dispatch, user])
 
