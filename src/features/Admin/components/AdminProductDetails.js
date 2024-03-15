@@ -5,7 +5,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllProductByIdsAsync, selectProductById } from '../../product-list/ProductListSlice';
 import { useParams } from 'react-router-dom';
 import { AddTocartAsync } from '../../Cart/CartSlice';
-import { selectLoggedInUser } from '../../Auth/authSlice';
+// import { selectLoggedInUser } from '../../Auth/authSlice';
+import { discountedPrice } from '../../../app/constants';
 
 const colors = [
     { name: 'White', class: 'bg-white', selectedClass: 'ring-gray-400' },
@@ -40,13 +41,13 @@ export default function AdminProductDetails() {
     const [selectedColor, setSelectedColor] = useState(colors[0])
     const [selectedSize, setSelectedSize] = useState(sizes[2])
     const product = useSelector(selectProductById);
-    const user = useSelector(selectLoggedInUser)
+    // const user = useSelector(selectLoggedInUser)
     const dispatch = useDispatch();
     const params = useParams();
 
     const handleCart = (e) => {
         e.preventDefault();
-        const newItem = { ...product, quantity: 1, user: user.id };
+        const newItem = { ...product, quantity: 1 };
         delete newItem['id'];
         dispatch(AddTocartAsync(newItem))
     }
@@ -132,7 +133,7 @@ export default function AdminProductDetails() {
                         {/* Options */}
                         <div className="mt-4 lg:row-span-3 lg:mt-0">
                             <h2 className="sr-only">Product information</h2>
-                            <p className="text-3xl tracking-tight text-gray-900">${product.price}</p>
+                            <p className="text-3xl tracking-tight text-gray-900">₹{discountedPrice(product)}</p>
 
                             {/* Reviews */}
                             <div className="mt-6">
@@ -151,9 +152,6 @@ export default function AdminProductDetails() {
                                         ))}
                                     </div>
                                     <p className="sr-only">{product.rating} out of 5 stars</p>
-                                    {/* <a href={reviews.href} className="ml-3 text-sm font-medium text-indigo-600 hover:text-indigo-500">
-                                 {reviews.totalCount} reviews
-                             </a> */}
                                 </div>
                             </div>
 

@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react'
 import { StarIcon } from '@heroicons/react/20/solid'
 import { RadioGroup } from '@headlessui/react'
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllProductByIdsAsync, selectProductById } from '../ProductListSlice';
+import { fetchAllProductByIdsAsync, selectProductById, selectProductListStatus } from '../ProductListSlice';
 import { useParams } from 'react-router-dom';
-import { AddTocartAsync } from '../../Cart/CartSlice';
+import { AddTocartAsync, selectItems } from '../../Cart/CartSlice';
 import { selectLoggedInUser } from '../../Auth/authSlice';
+import { discountedPrice } from '../../../app/constants';
+import { useAlert } from 'react-alert';
+import { Triangle } from 'react-loader-spinner';
 
 const colors = [
     { name: 'White', class: 'bg-white', selectedClass: 'ring-gray-400' },
@@ -34,21 +37,31 @@ const highlights = [
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
 }
-
-
 export default function ProductDetails() {
     const [selectedColor, setSelectedColor] = useState(colors[0])
     const [selectedSize, setSelectedSize] = useState(sizes[2])
     const product = useSelector(selectProductById);
-    const user = useSelector(selectLoggedInUser)
+    const items = useSelector(selectItems)
+    // const user = useSelector(selectLoggedInUser)
+    const status = useSelector(selectProductListStatus)
     const dispatch = useDispatch();
     const params = useParams();
+    const alert = useAlert();
 
     const handleCart = (e) => {
         e.preventDefault();
-        const newItem = { ...product, quantity: 1, user: user.id };
-        delete newItem['id'];
-        dispatch(AddTocartAsync(newItem))
+        // if (items.findIndex((item) => item.product.id === product.id) < 0) { 
+            if (items.findIndex((item) => item.product.id === product.id) < 0) {
+                console.log({ items, product });
+                const newItem = { product: product.id, quantity: 1 };
+            // delete newItem['id'];
+            dispatch(AddTocartAsync(newItem))
+            // we wait here for the backend to respond whether the product is successfully added or not.
+            alert.success("Item added successfully.");
+        }
+        else {
+            alert.error("This item is already added");
+        }
     }
 
     useEffect(() => {
@@ -57,10 +70,18 @@ export default function ProductDetails() {
 
     return (
         <div className="bg-white">
+            {status === 'loading' ? <Triangle
+            visible={true}
+            height="80"
+            width="80"
+            color="rgb(79,70,229)"
+            ariaLabel="triangle-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          /> : null}
             {product ? (
                 <div className="pt-6">
                     <nav aria-label="Breadcrumb">
-                        {/* <ol role="list" className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8"> */}
                         <ol className="mx-auto flex max-w-2xl items-center space-x-2 px-4 sm:px-6 lg:max-w-7xl lg:px-8">
                             {product.breadcrumbs && product.breadcrumbs.map((breadcrumb) => (
                                 <li key={breadcrumb.id}>
@@ -132,7 +153,7 @@ export default function ProductDetails() {
                         {/* Options */}
                         <div className="mt-4 lg:row-span-3 lg:mt-0">
                             <h2 className="sr-only">Product information</h2>
-                            <p className="text-3xl tracking-tight text-gray-900">${product.price}</p>
+                            <p className="text-3xl tracking-tight text-gray-900">₹{discountedPrice(product)}</p>
 
                             {/* Reviews */}
                             <div className="mt-6">
@@ -263,6 +284,7 @@ export default function ProductDetails() {
                                 >
                                     Add to Cart
                                 </button>
+
                             </form>
                         </div>
 

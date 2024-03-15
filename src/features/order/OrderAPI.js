@@ -1,5 +1,6 @@
 export function createOrder(order) {
   return new Promise(async (resolve) => {
+    // const response = await fetch('/orders', {
     const response = await fetch('http://localhost:8080/orders', {
       method: "POST",
       body: JSON.stringify(order),
@@ -10,18 +11,34 @@ export function createOrder(order) {
   }
   );
 }
-export function fetchAllOrders(pagination) {
+export function updateOrder(order) {
+  return new Promise(async (resolve) => {
+    // const response = await fetch('/orders/' + order.id, {
+    const response = await fetch('http://localhost:8080/orders/' + order.id, {
+      method: "PATCH",
+      body: JSON.stringify(order),
+      headers: { 'content-type': 'application/json' }
+    });
+    const data = await response.json();
+    resolve({ data });
+  }
+  );
+}
+export function fetchAllOrders(sort,pagination) {
   let queryString = "";
+  
+  for (let key in sort) {
+    queryString += `${key}=${sort[key]}&`
+  }
   for (let key in pagination) {
     queryString += `${key}=${pagination[key]}&`
   }
   return new Promise(async (resolve) => {
     const response = await fetch('http://localhost:8080/products?' + queryString);
-    // console.log(queryString);
-    // const data = await response.json();
+    // const response = await fetch('/products?' + queryString);
     const data = await response.json();
     const totalOrders = await response.headers.get('X-Total-Count');
-    console.log("This are the total items: " + totalOrders);
+    // console.log("This are the total items: " + totalOrders);
     resolve({ data: { orders: data, totalOrders: +totalOrders } })
   }
   );

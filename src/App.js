@@ -13,7 +13,7 @@ import Checkout from './Pages/Checkout';
 import ProductDetailsPage from './Pages/ProductDetailsPage';
 import Protected from './features/Auth/components/Protected';
 import { fetchItemsByUserIdAsync } from './features/Cart/CartSlice';
-import { selectLoggedInUser } from './features/Auth/authSlice';
+import { checkAuthAsync, selectLoggedInUser, selectUserChecked } from './features/Auth/authSlice';
 import PageNotFound from './Pages/PageNotFound';
 import OrderSuccessPage from './Pages/OrderSuccessPage';
 import UserOrder from './Pages/UserOrder';
@@ -26,6 +26,15 @@ import AdminProductDetailsPage from './Pages/AdminProductDetailsPage';
 import ProtectedAdmin from './features/Auth/components/ProtectedAdmin';
 import AdminProductDetailFormPage from './Pages/AdminProductDetailFormPage';
 import AdminOrderPage from './Pages/AdminOrderPage';
+
+// react alert
+import { positions, Provider } from 'react-alert';
+import AlertTemplate from 'react-alert-template-basic';
+import Stripecheckout from './Pages/StripeCheckout';
+const options = {
+  timeout: 5000,
+  position: positions.BOTTOM_LEFT
+};
 
 
 const router = createBrowserRouter([
@@ -86,12 +95,18 @@ const router = createBrowserRouter([
     element: <OrderSuccessPage />,
   },
   {
-    path: "/orders",
-    element: <UserOrder />,
+    path: "/my-orders",
+    element: <Protected>
+      <UserOrder />
+    </Protected>,
   },
   {
     path: "/profile",
     element: <UserProfilePage />,
+  },
+  {
+    path: "/stripe-checkout/",
+    element: <ProtectedAdmin><Stripecheckout /></ProtectedAdmin>,
   },
   {
     path: "/logout",
@@ -109,17 +124,26 @@ const router = createBrowserRouter([
 function App() {
   const dispatch = useDispatch();
   const user = useSelector(selectLoggedInUser);
+  const userChecked = useSelector(selectUserChecked);
+  useEffect(() => {
+    dispatch(checkAuthAsync())
+  }, [dispatch])
+
   useEffect(() => {
     if (user) {
-      dispatch(fetchItemsByUserIdAsync(user.id));
-      dispatch(fetchLoggedInUserAsync(user.id));
+      dispatch(fetchItemsByUserIdAsync());
+      dispatch(fetchLoggedInUserAsync());
     }
   }, [dispatch, user])
 
   return (
-    <div className="App">
-      <RouterProvider router={router} />
-    </div>
+    <>
+      <div className="App">
+        {userChecked && <Provider template={AlertTemplate} {...options}>
+          <RouterProvider router={router} />
+        </Provider>}
+      </div>
+    </>
   );
 }
 

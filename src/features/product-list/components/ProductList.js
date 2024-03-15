@@ -9,14 +9,16 @@ import {
   selectBrands,
   selectCategories,
   selectTotalItems,
+  selectProductListStatus,
 } from '../ProductListSlice';
 import { Dialog, Disclosure, Menu, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon, StarIcon } from '@heroicons/react/20/solid'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { Link } from 'react-router-dom';
+import { Triangle } from 'react-loader-spinner';
 
-import { ITEMS_PER_PAGE } from '../../../app/constants';
+import { ITEMS_PER_PAGE, discountedPrice } from '../../../app/constants';
 
 const sortOptions = [
   { name: 'Best Rating', sort: 'rating', order: 'desc', current: false },
@@ -34,6 +36,7 @@ export default function ProductList() {
   const brands = useSelector(selectBrands);
   const categories = useSelector(selectCategories);
   const totalItems = useSelector(selectTotalItems);
+  const status = useSelector(selectProductListStatus);
 
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
   const [filter, setFilter] = useState({});
@@ -87,7 +90,7 @@ export default function ProductList() {
   useEffect(() => {
     const pagination = { _page: page, _limit: ITEMS_PER_PAGE };
     // const pagination = { _page: page, _per_page: ITEMS_PER_PAGE };
-    dispatch(fetchProductsByFiltersAsync({ filter, sort, pagination }));   //--> 5:06:10
+    dispatch(fetchProductsByFiltersAsync({ filter, sort, pagination }));   
   }, [dispatch, filter, sort, page]);
 
   useEffect(() => {
@@ -182,7 +185,7 @@ export default function ProductList() {
               <div className="lg:col-span-3">
 
                 {/* The product boxes or cards */}
-                <ProductGrid products={products} />
+                <ProductGrid products={products} status={status} />
 
               </div>
               {/* Product grid End */}
@@ -405,11 +408,20 @@ function Pagination({ page, setPage, handlePage, totalItems }) {
     </div>
   )
 }
-function ProductGrid({ products }) {
+function ProductGrid({ products, status }) {
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-2xl px-4 py-0 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
         <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+          {status === 'loading' ? <Triangle
+            visible={true}
+            height="80"
+            width="80"
+            color="rgb(79,70,229)"
+            ariaLabel="triangle-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          /> : null}
           {products?.map((product) => (
             <Link to={`/product-detail/${product.id}`} key={product.id}>
               <div key={product.id} className="group relative border-solid border-2 border-gray-400 p-2">
@@ -434,14 +446,25 @@ function ProductGrid({ products }) {
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-green-600">$
-                      {Math.round(product.price * (1 - product.discountPercentage / 100))}
+                    <p className="text-sm font-medium text-green-600">₹
+                      {/* {Math.round(product.price * (1 - product.discountPercentage / 100))} */}
+                      {discountedPrice(product)}
                     </p>
                     <p className="text-sm block font-medium text-gray-900 line-through">
-                      ${product.price}
+                    ₹ {product.price}
                     </p>
                   </div>
                 </div>
+                {product.deleted && (
+                  <div>
+                    <p className='text-sm text-red-400'>Product Deleted</p>
+                  </div>
+                )}
+                {product.stock <= 0 && (
+                  <div>
+                    <p className='text-sm text-red-400'>Out of Stock</p>
+                  </div>
+                )}
               </div>
             </Link>
           ))}

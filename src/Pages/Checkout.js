@@ -1,12 +1,12 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { deleteItemFromCartAsync, selectItems, updateItemAsync } from '../features/Cart/CartSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { useForm } from 'react-hook-form'
-import {updateUserAsync} from '../features/Auth/authSlice'
-import { createOrderAsync, currentOrder } from '../features/order/OrderSlice'
+import { updateUserAsync } from '../features/user/userSlice'
+import { createOrderAsync,selectCurrentOrder } from '../features/order/OrderSlice'
 import { selectUserInfo } from '../features/user/userSlice'
-
+import { discountedPrice } from '../app/constants'
 const Checkout = () => {
     const [open, setOpen] = useState(true)
     console.log(open);
@@ -16,14 +16,15 @@ const Checkout = () => {
     console.log(errors);
     const user = useSelector(selectUserInfo);
     const items = useSelector(selectItems);
-    const CurrentOrder = useSelector(currentOrder);
-    const totalAmount = items.reduce((amount, item) => item.price * item.quantity + amount, 0)
+    const CurrentOrder = useSelector(selectCurrentOrder);
+    // const totalAmount = items.reduce((amount, item) => item.price * item.quantity + amount, 0)
+    const totalAmount = items.reduce((amount, item) => discountedPrice(item.product) * item.quantity + amount, 0)
     const totalItems = items.reduce((total, item) => item.quantity + total, 0)
 
     const [selectedAddress, setSelectedAddress] = useState(null)
     const [paymentMethod, setPaymentMethod] = useState(null)
     const handleQuantity = (e, item) => {
-        dispatch(updateItemAsync({ ...item, quantity: +e.target.value }))
+        dispatch(updateItemAsync({ id: item.id, quantity: +e.target.value }))
     }
     const handleRemove = (e, id) => {
         dispatch(deleteItemFromCartAsync(id))
@@ -42,7 +43,7 @@ const Checkout = () => {
                 items,
                 totalAmount,
                 totalItems,
-                user,
+                user: user.id,
                 paymentMethod,
                 selectedAddress,
                 status: "pending"
@@ -61,7 +62,8 @@ const Checkout = () => {
         <>
             {/* {!items.lenght && <Navigate to="/" replace={true}></Navigate>} */}
             {items.lenght && <Navigate to="/" replace={true}></Navigate>}
-            {CurrentOrder && <Navigate to={`/order-success/${CurrentOrder.id}`} replace={true}></Navigate>}
+            {CurrentOrder && CurrentOrder.paymentMethod === 'cash' && <Navigate to={`/order-success/${CurrentOrder.id}`} replace={true}></Navigate>}
+            {CurrentOrder && CurrentOrder.paymentMethod === 'card' && <Navigate to={`/stripe-checkout/${CurrentOrder.id}`} replace={true}></Navigate>}
             <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
                 <div className='grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-5'>
                     <div className='lg:col-span-3'>
@@ -292,7 +294,7 @@ const Checkout = () => {
                                                             <h3>
                                                                 <a href={item.href}>{item.title}</a>
                                                             </h3>
-                                                            <p className="ml-4">${item.price}</p>
+                                                            <p className="ml-4">₹{discountedPrice(item)}</p>
                                                         </div>
                                                         <p className="mt-1 text-sm text-gray-500">{item.brand}</p>
                                                     </div>
@@ -332,7 +334,7 @@ const Checkout = () => {
                             <div className="border-t border-gray-200 px-2 py-6 sm:px-2">
                                 <div className="flex justify-between my-2 text-base font-medium text-gray-900">
                                     <p>Subtotal</p>
-                                    <p>${totalAmount}</p>
+                                    <p>₹{totalAmount}</p>
                                 </div>
                                 <div className="flex justify-between my-2 text-base font-medium text-gray-900">
                                     <p>Total Items</p>
